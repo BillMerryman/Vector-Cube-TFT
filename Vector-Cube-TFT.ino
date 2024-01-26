@@ -3,9 +3,12 @@
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include "WiFi.h"
 #include "Protocol.h"
+#include "blink.h"
+#include "lookleft.h"
+#include "lookright.h"
 
-const char* ssid     = "{Your SSID}";
-const char* password = "{Your password}";
+const char* ssid     = "{your access point}";
+const char* password = "{your password}";
 
 #define TFT_RST       D0 // Or set to -1 and connect to Arduino RESET pin
 #define TFT_DC        D1
@@ -64,6 +67,9 @@ void setup(void)
   tft.println(buf);
   delay(5000);
   tft.fillScreen(ST77XX_BLACK);
+
+  memcpy(&animation, animation_blink, sizeof(Animation));
+  playAnimation();
 }
 
 void connectWiFi(void)
@@ -90,6 +96,22 @@ void connectWiFi(void)
 
 void loop()
 {
+  switch(random(100000))
+  {
+    case 1:
+      memcpy(&animation, animation_blink, sizeof(Animation));
+      playAnimation();
+      break;
+    case 2:
+      memcpy(&animation, animation_lookleft, sizeof(Animation));
+      playAnimation();
+      break;
+    case 3:
+      memcpy(&animation, animation_lookright, sizeof(Animation));
+      playAnimation();
+      break;
+  }
+
   imageStream = server.available();
   if(imageStream)
   {
@@ -113,6 +135,7 @@ void loop()
         {
           tft.drawRGBBitmap(0, 0, canvas.getBuffer(), SCREEN_WIDTH, SCREEN_HEIGHT);
           Serial.println("Image received successfully.\n");
+          delay(5000);
         }
         else
         {
