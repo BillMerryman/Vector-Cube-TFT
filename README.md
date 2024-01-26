@@ -6,8 +6,8 @@ Here it is responding to a [custom intent].
 Here it is being used with the [animation editor].
 
 
-[animation editor] <https://youtube.com/shorts/Wk3Y-pQeBDk>
-[custom intent] <https://youtube.com/shorts/aNmvLydM4h4>
+[animation editor] <https://youtube.com/watch/Wk3Y-pQeBDk>
+[custom intent] <https://youtube.com/watch/aNmvLydM4h4>
 [Vector Cube Animation Editor]: <https://github.com/BillMerryman/VectorCubeAnimationEditor>
 [Vector Cube Customized With Screen]: <https://www.thingiverse.com/thing:6344837>
 

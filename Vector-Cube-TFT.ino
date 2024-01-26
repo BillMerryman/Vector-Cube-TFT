@@ -7,7 +7,7 @@
 #include "lookleft.h"
 #include "lookright.h"
 
-const char* ssid     = "{your access point}";
+const char* ssid     = "{your ssid}";
 const char* password = "{your password}";
 
 #define TFT_RST       D0 // Or set to -1 and connect to Arduino RESET pin
