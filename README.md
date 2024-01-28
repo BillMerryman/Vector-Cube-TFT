@@ -4,9 +4,9 @@ This project implements a new cube for the Vector robot that has a .85" TFT scre
 
 The following demonstrations show:
 
--[A custom intent playing an animation on the cube].
--[A custom intent performing an image classification].
--[The animation editor manipulating and transmitting an animation].
++[A custom intent playing an animation on the cube].
++[A custom intent performing an image classification].
++[The animation editor manipulating and transmitting an animation].
 
 [A custom intent playing an animation on the cube]: <https://youtu.be/nP3h5EDbyXo>
 [A custom intent performing an image classification]: <https://youtu.be/6ILSga8wy7s>
