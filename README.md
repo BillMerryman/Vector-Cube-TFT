@@ -10,6 +10,7 @@ This project implements a new cube for the Vector robot, with the addition of a 
 [a custom intent performing an image classification]: <https://youtu.be/6ILSga8wy7s>
 [the animation editor manipulating and transmitting an animation]: <https://youtu.be/6XQODFT1Ack>
 
+[Vector-Cube-TFT]: <https://github.com/BillMerryman/Vector-Cube-TFT>
 [Vector Cube Animation Editor]: <https://github.com/BillMerryman/VectorCubeAnimationEditor>
 [Vector Cube Customized With Screen]: <https://www.thingiverse.com/thing:6344837>
 
