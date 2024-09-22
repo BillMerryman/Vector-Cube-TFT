@@ -1,10 +1,15 @@
 #include <SPI.h>
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7789.h>
 #include <Adafruit_NeoPixel.h>
 #include <Arduino_LSM6DS3.h>
 #include "WiFi.h"
+#include "TFT.h"
+#include "LED.h"
+#include "TCP.h"
 #include "Protocol.h"
+#include "AnimationPlayer.h"
+#include "IMUManager.h"
 #include "blink.h"
 #include "lookleft.h"
 #include "lookright.h"
@@ -12,33 +17,16 @@
 const char* ssid     = "DieFamilieMerryman2.4G";
 const char* password = "020805032103041977teddie";
 
-#define TFT_RST               D0 // Or set to -1 and connect to Arduino RESET pin
-#define TFT_DC                D1
-#define TFT_CS                D2
-#define TFT_BACKLIGHT         D3
-#define SPI_SPEED             40000000
-#define ROTATION              1
 #define SERIAL_SPEED          9600
 
-#define TCP_PORT              80
-#define TCP_TIMEOUT           2000
-
-#define SCREEN_WIDTH          128
-#define SCREEN_HEIGHT         128
-
-#define LEDS_DATA_PIN         21
-#define NUMBER_OF_LEDS        4
-
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
-WiFiServer server(TCP_PORT);
-WiFiClient imageStream;
-
+AnimationPlayer animationPlayer = AnimationPlayer(tft);
 Animation animation;
 GFXcanvas16 canvas = GFXcanvas16(SCREEN_WIDTH, SCREEN_HEIGHT);
-
+WiFiServer server(TCP_PORT);
+WiFiClient imageStream;
 Adafruit_NeoPixel pixels(NUMBER_OF_LEDS, LEDS_DATA_PIN, NEO_GRB + NEO_KHZ800);
-
-float xAccel, yAccel, zAccel, xAngular, yAngular, zAngular;
+IMUManager imuManager(IMU, 50, 0);
 
 void setup(void)
 {
@@ -58,34 +46,24 @@ void setup(void)
   delay(5000);
   tft.fillScreen(ST77XX_BLACK);
 
-  memcpy(&animation, animation_blink, sizeof(Animation));
-  playAnimation();
+  animationPlayer.start(animation_blink, millis());
 }
 
 void loop()
 {
-  static int waitingToReadIMU = 0;
 
-  if (!waitingToReadIMU)
-  {
-    updateIMU();
-    if((abs(xAccel) > 2) || (abs(yAccel) > 2)) testLEDs();
-  }
-  if(waitingToReadIMU++ > 9) waitingToReadIMU=0;
+  unsigned long loopTime = millis();
 
   switch(random(100000))
   {
     case 1:
-      memcpy(&animation, animation_blink, sizeof(Animation));
-      playAnimation();
+      animationPlayer.start(animation_blink, loopTime);
       break;
     case 2:
-      memcpy(&animation, animation_lookleft, sizeof(Animation));
-      playAnimation();
+      animationPlayer.start(animation_lookleft, loopTime);
       break;
     case 3:
-      memcpy(&animation, animation_lookright, sizeof(Animation));
-      playAnimation();
+      animationPlayer.start(animation_lookright, loopTime);
       break;
   }
 
@@ -97,7 +75,7 @@ void loop()
       case _Animation:
         if(bytewiseReceive((uint8_t *)&animation, sizeof(animation)))
         {
-          playAnimation();
+          animationPlayer.start((uint8_t *)&animation, loopTime);
           Serial.println("Animation received successfully.\n");
         }
         else
@@ -124,6 +102,9 @@ void loop()
     }
     imageStream.flush();
   }
+  animationPlayer.update(loopTime);
+  imuManager.poll(loopTime);
+  if(imuManager.isShaken()) testLEDs();
 }
 
 void initializeTFT(void)
@@ -216,46 +197,6 @@ TransmissionType getTransmissionType()
   return (TransmissionType)getUint16tFromStream();
 }
 
-void playAnimation()
-{
-    for(int frameCounter = 0; frameCounter < animation.frameCount; frameCounter++){
-      AnimationFrame currentFrame = animation.frames[frameCounter];
-      canvas.fillScreen(currentFrame.fillColor);
-      for(int primitiveCounter = 0; primitiveCounter < currentFrame.primitiveCount; primitiveCounter++){
-        Primitive primitive = currentFrame.primitives[primitiveCounter];
-        switch(primitive.type){
-          case _Circle:
-            Circle circle;
-            circle = primitive.circle;
-            canvas.fillCircle(circle.x0, circle.y0, circle.r, circle.color);
-            break;
-          case _QuarterCircle:
-            QuarterCircle quarterCircle;
-            quarterCircle = primitive.quarterCircle;
-            canvas.fillCircleHelper(quarterCircle.x0, quarterCircle.y0, quarterCircle.r, quarterCircle.quadrants, quarterCircle.delta, quarterCircle.color);
-            break;
-          case _Triangle:
-            Triangle triangle;
-            triangle = primitive.triangle;
-            canvas.fillTriangle(triangle.x0, triangle.y0, triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.color);
-            break;
-          case _RoundRect:
-            RoundRect roundRect;
-            roundRect = primitive.roundRect;
-            canvas.fillRoundRect(roundRect.x0, roundRect.y0, roundRect.w, roundRect.h, roundRect.radius, roundRect.color);
-            break;
-          case _Line:
-            Line line;
-            line = primitive.line;
-            canvas.drawLine(line.x0, line.y0, line.x1, line.y1, line.color);
-            break;
-        }
-      }
-      tft.drawRGBBitmap(0, 0, canvas.getBuffer(), SCREEN_WIDTH, SCREEN_HEIGHT);
-      delay(currentFrame.duration);
-    }
-}
-
 uint16_t getUint16tFromStream()
 {
   while(!imageStream.available());
@@ -345,15 +286,3 @@ void testLEDs()
   pixels.clear();
   pixels.show();
 }
-
-void updateIMU() 
-{
-    if (IMU.accelerationAvailable()) {
-      IMU.readAcceleration(xAccel, yAccel, zAccel);
-    }
-
-    if (IMU.gyroscopeAvailable()) {
-      IMU.readGyroscope(xAngular, yAngular, zAngular);
-    }
-}
-
