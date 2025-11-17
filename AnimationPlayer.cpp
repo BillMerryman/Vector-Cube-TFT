@@ -37,15 +37,10 @@ void AnimationPlayer::drawFrame(AnimationFrame &frame)
       for(int primitiveCounter = 0; primitiveCounter < frame.primitiveCount; primitiveCounter++){
         Primitive primitive = frame.primitives[primitiveCounter];
         switch(primitive.type){
-          case _Circle:
-            Circle circle;
-            circle = primitive.circle;
-            canvas.fillCircle(circle.x0, circle.y0, circle.r, circle.color);
-            break;
-          case _QuarterCircle:
-            QuarterCircle quarterCircle;
-            quarterCircle = primitive.quarterCircle;
-            canvas.fillCircleHelper(quarterCircle.x0, quarterCircle.y0, quarterCircle.r, quarterCircle.quadrants, quarterCircle.delta, quarterCircle.color);
+          case _Line:
+            Line line;
+            line = primitive.line;
+            canvas.drawLine(line.x0, line.y0, line.x1, line.y1, line.color);
             break;
           case _Triangle:
             Triangle triangle;
@@ -57,10 +52,15 @@ void AnimationPlayer::drawFrame(AnimationFrame &frame)
             roundRect = primitive.roundRect;
             canvas.fillRoundRect(roundRect.x0, roundRect.y0, roundRect.w, roundRect.h, roundRect.radius, roundRect.color);
             break;
-          case _Line:
-            Line line;
-            line = primitive.line;
-            canvas.drawLine(line.x0, line.y0, line.x1, line.y1, line.color);
+          case _RotatedRect:
+            RotatedRect rotatedRect;
+            rotatedRect = primitive.rotatedRect;
+            canvas.fillRotatedRect(rotatedRect.cenX, rotatedRect.cenY, rotatedRect.w, rotatedRect.h, rotatedRect.angleDeg, rotatedRect.color);
+            break;
+          case _QuarterCircle:
+            QuarterCircle quarterCircle;
+            quarterCircle = primitive.quarterCircle;
+            canvas.fillQuarterCircle(quarterCircle.x0, quarterCircle.y0, quarterCircle.r, quarterCircle.quadrants, quarterCircle.delta, quarterCircle.color);
             break;
         }
       }

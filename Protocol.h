@@ -9,11 +9,56 @@ const TransmissionType _Image = 2;
 
 typedef uint16_t PrimitiveType;
 
-const PrimitiveType _Circle = 1;
-const PrimitiveType _QuarterCircle = 2;
-const PrimitiveType _Triangle = 3;
-const PrimitiveType _RoundRect = 4;
-const PrimitiveType _Line = 5;
+const PrimitiveType _Line = 10;
+const PrimitiveType _Triangle = 25;
+const PrimitiveType _RoundRect = 35;
+const PrimitiveType _RotatedRect = 45;
+const PrimitiveType _Circle = 55;
+const PrimitiveType _QuarterCircle = 65;
+
+typedef struct __attribute__((packed)){
+  int16_t x0;
+  int16_t y0;
+  int16_t x1;
+  int16_t y1;
+  uint16_t color;
+} Line;
+
+typedef struct __attribute__((packed)){
+  int16_t x0;
+  int16_t y0;
+  int16_t w;
+  int16_t h;
+  uint16_t color;
+} Rect;
+
+typedef struct __attribute__((packed)){
+  int16_t x0;
+  int16_t y0;
+  int16_t w;
+  int16_t h;
+  int16_t radius;
+  uint16_t color;
+} RoundRect;
+
+typedef struct __attribute__((packed)){
+  int16_t cenX;
+  int16_t cenY;
+  int16_t w;
+  int16_t h;
+  int16_t angleDeg;
+  uint16_t color;
+} RotatedRect;
+
+typedef struct __attribute__((packed)){
+  int16_t x0;
+  int16_t y0;
+  int16_t x1;
+  int16_t y1;
+  int16_t x2;
+  int16_t y2;
+  uint16_t color;
+} Triangle;
 
 typedef struct __attribute__((packed)){
   int16_t x0;
@@ -32,40 +77,14 @@ typedef struct __attribute__((packed)){
 } QuarterCircle;
 
 typedef struct __attribute__((packed)){
-  int16_t x0;
-  int16_t y0;
-  int16_t x1;
-  int16_t y1;
-  int16_t x2;
-  int16_t y2;
-  uint16_t color;
-} Triangle;
-
-typedef struct __attribute__((packed)){
-  int16_t x0;
-  int16_t y0;
-  int16_t w;
-  int16_t h;
-  int16_t radius;
-  uint16_t color;
-} RoundRect;
-
-typedef struct __attribute__((packed)){
-  int16_t x0;
-  int16_t y0;
-  int16_t x1;
-  int16_t y1;
-  uint16_t color;
-} Line;
-
-typedef struct __attribute__((packed)){
   PrimitiveType type;
   union{
+    Line line;
+    RoundRect roundRect;
+    RotatedRect rotatedRect;
+    Triangle triangle;
     Circle circle;
     QuarterCircle quarterCircle;
-    Triangle triangle;
-    RoundRect roundRect;
-    Line line;
   };
 } Primitive;
 

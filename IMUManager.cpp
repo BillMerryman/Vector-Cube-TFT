@@ -13,12 +13,19 @@ void IMUManager::poll(unsigned long currentTime)
   if(currentTime < nextPollTime) return;
   nextPollTime = currentTime + pollFrequency;
 
-  if (IMU.accelerationAvailable()) {
+  if (IMU.accelerationAvailable()) 
+  {
     IMU.readAcceleration(xAccel, yAccel, zAccel);
   }
 
-  if (IMU.gyroscopeAvailable()) {
+  if (IMU.gyroscopeAvailable()) 
+  {
     IMU.readGyroscope(xAngular, yAngular, zAngular);
+  }
+
+  if (IMU.temperatureAvailable()) 
+  {
+    IMU.readTemperature(temperature);
   }
 
   if((abs(xAccel) > shakeForce) || (abs(yAccel) > shakeForce) || (abs(zAccel) > shakeForce))
@@ -69,5 +76,10 @@ float IMUManager::GetYAngular()
 float IMUManager::GetZAngular()
 {
   return zAngular;
+}
+
+float IMUManager::GetTemperature()
+{
+  return temperature;
 }
 

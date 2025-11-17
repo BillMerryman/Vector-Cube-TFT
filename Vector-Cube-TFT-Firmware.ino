@@ -14,8 +14,8 @@
 #include "lookleft.h"
 #include "lookright.h"
 
-const char* ssid     = "Your SSID";
-const char* password = "Your Password";
+const char* ssid     = "{Your SSID}";
+const char* password = "{Your Password}";
 
 #define SERIAL_SPEED          9600
 
@@ -44,7 +44,6 @@ void setup(void)
   sprintf (buf, "%d", sizeof(Animation));
   tft.println(buf);
   delay(5000);
-  tft.fillScreen(ST77XX_BLACK);
 
   animationPlayer.start(animation_blink, millis());
 }
@@ -53,6 +52,23 @@ void loop()
 {
 
   unsigned long loopTime = millis();
+  //Serial.println(loopTime); Last check this loop is executing 15 times per milli WITH the serial.println...
+
+  imuManager.poll(loopTime);
+  if(imuManager.isShaken()) LEDCycle();
+  float zAccel = imuManager.GetZAcceleration();
+  if(zAccel > .95 && zAccel < 1.5)
+  {
+    tft.setRotation(ROTATION + 2);
+    GFXcanvas16 canvas = GFXcanvas16(SCREEN_WIDTH, SCREEN_HEIGHT);
+    canvas.fillScreen(0);
+    canvas.setTextSize(4);
+    canvas.setTextColor(0Xffff);
+    canvas.print(imuManager.GetTemperature());
+    tft.drawRGBBitmap(0, 0, canvas.getBuffer(), SCREEN_WIDTH, SCREEN_HEIGHT);
+    tft.setRotation(ROTATION);
+    return;
+  }
 
   switch(random(100000))
   {
@@ -103,8 +119,6 @@ void loop()
     imageStream.flush();
   }
   animationPlayer.update(loopTime);
-  imuManager.poll(loopTime);
-  if(imuManager.isShaken()) LEDCycle();
 }
 
 void initializeTFT(void)
