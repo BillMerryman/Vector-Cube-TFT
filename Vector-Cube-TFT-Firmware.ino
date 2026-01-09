@@ -14,8 +14,12 @@
 #include "lookleft.h"
 #include "lookright.h"
 
-const char* ssid     = "{Your SSID}";
-const char* password = "{Your password}";
+//set up your own secrets.h file that creates defines for
+//your router SSID and password. You can use the 
+//secrets.h.example file as a template
+#include "secrets.h"
+const char* ssid     = SSID;
+const char* password = PASS;
 
 #define SERIAL_SPEED          9600
 
