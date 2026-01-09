@@ -15,7 +15,7 @@
 #include "lookright.h"
 
 const char* ssid     = "{Your SSID}";
-const char* password = "{Your Password}";
+const char* password = "{Your password}";
 
 #define SERIAL_SPEED          9600
 
