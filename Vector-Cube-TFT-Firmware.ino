@@ -25,7 +25,7 @@ const char* password = PASS;
 
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 AnimationPlayer animationPlayer = AnimationPlayer(tft);
-Animation animation;
+byte animation[1024];
 GFXcanvas16 canvas = GFXcanvas16(SCREEN_WIDTH, SCREEN_HEIGHT);
 WiFiServer server(TCP_PORT);
 WiFiClient imageStream;
@@ -44,12 +44,9 @@ void setup(void)
   Serial.println("Init complete.");
   tft.println("Init complete.");
 
-  char buf [10];
-  sprintf (buf, "%d", sizeof(Animation));
-  tft.println(buf);
-  delay(5000);
+  delay(2000);
 
-  animationPlayer.start(animation_blink, millis());
+  animationPlayer.start(animation_blink, sizeof(animation_blink), millis());
 }
 
 void loop()
@@ -77,13 +74,13 @@ void loop()
   switch(random(100000))
   {
     case 1:
-      animationPlayer.start(animation_blink, loopTime);
+      animationPlayer.start(animation_blink, sizeof(animation_blink), loopTime);
       break;
     case 2:
-      animationPlayer.start(animation_lookleft, loopTime);
+      animationPlayer.start(animation_lookleft, sizeof(animation_lookleft), loopTime);
       break;
     case 3:
-      animationPlayer.start(animation_lookright, loopTime);
+      animationPlayer.start(animation_lookright, sizeof(animation_lookright), loopTime);
       break;
   }
 
@@ -95,7 +92,7 @@ void loop()
       case _Animation:
         if(bytewiseReceive((uint8_t *)&animation, sizeof(animation)))
         {
-          animationPlayer.start((uint8_t *)&animation, loopTime);
+          animationPlayer.start((uint8_t *)&animation, sizeof(animation), loopTime);
           Serial.println("Animation received successfully.\n");
         }
         else
