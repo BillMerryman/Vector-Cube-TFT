@@ -2,15 +2,14 @@
 
 using namespace AnimationFlatbuffer;
 
-AnimationPlayer::AnimationPlayer(Adafruit_ST7789& _tft):tft(_tft)
+AnimationPlayer::AnimationPlayer(Adafruit_ST7789& _tft, GFXcanvas16& _canvas):tft(_tft), canvas(_canvas)
 {
 }
 
-void AnimationPlayer::start(const uint8_t _animation[], size_t animationSize, unsigned long currentTime)
+void AnimationPlayer::start(const uint8_t _animation[], unsigned long currentTime)
 {
   if(isPlaying) return;
-  memcpy(&animation, _animation, animationSize);
-  animationFB = GetSizePrefixedAnimationFB(animation);
+  animationFB = GetSizePrefixedAnimationFB(_animation);
   if (animationFB->frames()->size()==0) return;
   currentFrameNumber = 0;
   drawFrame(animationFB->frames()->Get(currentFrameNumber));

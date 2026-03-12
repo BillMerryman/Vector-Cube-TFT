@@ -24,9 +24,10 @@ const char* password = PASS;
 #define SERIAL_SPEED          9600
 
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
-AnimationPlayer animationPlayer = AnimationPlayer(tft);
-byte animation[1024];
 GFXcanvas16 canvas = GFXcanvas16(SCREEN_WIDTH, SCREEN_HEIGHT);
+AnimationPlayer animationPlayer = AnimationPlayer(tft, canvas);
+byte *animation;
+int animationSize;
 WiFiServer server(TCP_PORT);
 WiFiClient imageStream;
 Adafruit_NeoPixel pixels(NUMBER_OF_LEDS, LEDS_DATA_PIN, NEO_GRB + NEO_KHZ800);
@@ -37,7 +38,6 @@ void setup(void)
   Serial.begin(SERIAL_SPEED);
   Serial.println("Vector Cube Startup.\n");
   initializeTFT();
-  tft.println("Vector Cube Startup.\n");
   initializeLEDs();
   initializeWiFi();
   initializeIMU();
@@ -46,7 +46,12 @@ void setup(void)
 
   delay(2000);
 
-  animationPlayer.start(animation_blink, sizeof(animation_blink), millis());
+  canvas.setTextSize(4);
+  canvas.setTextColor(0Xffff);
+  canvas.setCursor(0, 0);
+  animationPlayer.start(animation_blink, millis());
+  animation = (byte *)malloc(sizeof(int));
+  animationSize = sizeof(int);
 }
 
 void loop()
@@ -61,10 +66,8 @@ void loop()
   if(zAccel > .95 && zAccel < 1.5)
   {
     tft.setRotation(ROTATION + 2);
-    GFXcanvas16 canvas = GFXcanvas16(SCREEN_WIDTH, SCREEN_HEIGHT);
     canvas.fillScreen(0);
-    canvas.setTextSize(4);
-    canvas.setTextColor(0Xffff);
+    canvas.setCursor(0, 0);
     canvas.print(imuManager.GetTemperature());
     tft.drawRGBBitmap(0, 0, canvas.getBuffer(), SCREEN_WIDTH, SCREEN_HEIGHT);
     tft.setRotation(ROTATION);
@@ -74,13 +77,13 @@ void loop()
   switch(random(100000))
   {
     case 1:
-      animationPlayer.start(animation_blink, sizeof(animation_blink), loopTime);
+      animationPlayer.start(animation_blink, loopTime);
       break;
     case 2:
-      animationPlayer.start(animation_lookleft, sizeof(animation_lookleft), loopTime);
+      animationPlayer.start(animation_lookleft, loopTime);
       break;
     case 3:
-      animationPlayer.start(animation_lookright, sizeof(animation_lookright), loopTime);
+      animationPlayer.start(animation_lookright, loopTime);
       break;
   }
 
@@ -90,14 +93,29 @@ void loop()
     TransmissionType transmissionType = getTransmissionType();
     switch(transmissionType){
       case _Animation:
-        if(bytewiseReceive((uint8_t *)&animation, sizeof(animation)))
+        if(bytewiseReceive((uint8_t *)animation, 4))
         {
-          animationPlayer.start((uint8_t *)&animation, sizeof(animation), loopTime);
-          Serial.println("Animation received successfully.\n");
+          uint32_t incoming_size = *(uint32_t *)animation;
+          if(incoming_size > animationSize)
+          {
+            uint8_t *new_buf = (byte *)realloc(animation, 4 + incoming_size);
+            if (!new_buf) break;
+            animation = new_buf;
+            animationSize = incoming_size;
+          }
+          if(bytewiseReceive((uint8_t *)(animation + 4), incoming_size))
+          {
+            animationPlayer.start(animation, loopTime);
+            Serial.println("Animation received successfully.\n");
+          }
+          else
+          {
+            Serial.println("Animation receive failed.\n");
+          }
         }
         else
         {
-          Serial.println("Animation receive failed.\n");
+          Serial.println("Animation length receive failed.\n");
         }
         break;
       case _Image:
@@ -135,6 +153,7 @@ void initializeTFT(void)
   tft.setTextSize(1);
 
   Serial.println("TFT initialized.");
+  tft.println("Vector Cube Startup.");
   tft.println("TFT initialized.");
 }
 

@@ -8,15 +8,14 @@
 class AnimationPlayer
 {
   public:
-    AnimationPlayer(Adafruit_ST7789& _tft);
-    void start(const uint8_t _animation[], size_t animationSize, unsigned long currentTime);
+    AnimationPlayer(Adafruit_ST7789& _tft, GFXcanvas16& _canvas);
+    void start(const uint8_t _animation[], unsigned long currentTime);
     void update(unsigned long currentTime);
 
   protected:
     void drawFrame(const AnimationFlatbuffer::AnimationFrameFB* frame);
     Adafruit_ST7789& tft;
-    byte animation[1024];
-    GFXcanvas16 canvas = GFXcanvas16(SCREEN_WIDTH, SCREEN_HEIGHT);
+    GFXcanvas16& canvas;
     bool isPlaying = false;
     unsigned int currentFrameNumber;
     unsigned long currentFrameExpiration;
