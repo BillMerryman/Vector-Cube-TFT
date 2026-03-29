@@ -105,6 +105,11 @@ void loop()
           }
           if(bytewiseReceive((uint8_t *)(animation + 4), incoming_size))
           {
+            //TODO: Call the animation validation here before conditionally starting the animation
+            //Note: the difference I may be seeing with single frames displaying shorter than frame duration
+            //could be because I am passing 'loopTime' instead of 'millis()', and the frame received code could
+            //be eating up a lot of the time between setting 'loopTime' and this point in the code.
+            //Needs further investigation... 
             animationPlayer.start(animation, loopTime);
             Serial.println("Animation received successfully.\n");
           }

@@ -1,5 +1,7 @@
 #include "AnimationPlayer.h"
 
+#define QUARTER_CIRCLE_DELTA_TO_BE_REMOVED 0
+
 using namespace AnimationFlatbuffer;
 
 AnimationPlayer::AnimationPlayer(Adafruit_ST7789& _tft, GFXcanvas16& _canvas):tft(_tft), canvas(_canvas)
@@ -12,6 +14,7 @@ void AnimationPlayer::start(const uint8_t _animation[], unsigned long currentTim
   animationFB = GetSizePrefixedAnimationFB(_animation);
   if (animationFB->frames()->size()==0) return;
   currentFrameNumber = 0;
+  currentFrameExpiration = currentTime + animationFB->frames()->Get(currentFrameNumber)->duration();
   drawFrame(animationFB->frames()->Get(currentFrameNumber));
   isPlaying = true;
 }
@@ -84,7 +87,7 @@ void AnimationPlayer::drawFrame(const AnimationFlatbuffer::AnimationFrameFB* fra
             const CircleFB* circleFB = static_cast<const CircleFB*>(primitiveData);
             int16_t x0 = animationFB->x0() + frame->x0() + circleFB->x0();
             int16_t y0 = animationFB->y0() + frame->y0() + circleFB->y0();
-            canvas.fillQuarterCircle(x0, y0, circleFB->r(), circleFB->quadrants(), circleFB->delta(), circleFB->color());
+            canvas.fillQuarterCircle(x0, y0, circleFB->r(), circleFB->quadrants(), QUARTER_CIRCLE_DELTA_TO_BE_REMOVED, circleFB->color());
             break;
           }
         }

@@ -295,7 +295,6 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(2) CircleFB FLATBUFFERS_FINAL_CLASS {
   int16_t r_;
   uint8_t quadrants_;
   int8_t padding0__;
-  int16_t delta_;
   uint16_t color_;
 
  public:
@@ -305,17 +304,15 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(2) CircleFB FLATBUFFERS_FINAL_CLASS {
         r_(0),
         quadrants_(0),
         padding0__(0),
-        delta_(0),
         color_(0) {
     (void)padding0__;
   }
-  CircleFB(int16_t _x0, int16_t _y0, int16_t _r, uint8_t _quadrants, int16_t _delta, uint16_t _color)
+  CircleFB(int16_t _x0, int16_t _y0, int16_t _r, uint8_t _quadrants, uint16_t _color)
       : x0_(::flatbuffers::EndianScalar(_x0)),
         y0_(::flatbuffers::EndianScalar(_y0)),
         r_(::flatbuffers::EndianScalar(_r)),
         quadrants_(::flatbuffers::EndianScalar(_quadrants)),
         padding0__(0),
-        delta_(::flatbuffers::EndianScalar(_delta)),
         color_(::flatbuffers::EndianScalar(_color)) {
     (void)padding0__;
   }
@@ -331,14 +328,11 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(2) CircleFB FLATBUFFERS_FINAL_CLASS {
   uint8_t quadrants() const {
     return ::flatbuffers::EndianScalar(quadrants_);
   }
-  int16_t delta() const {
-    return ::flatbuffers::EndianScalar(delta_);
-  }
   uint16_t color() const {
     return ::flatbuffers::EndianScalar(color_);
   }
 };
-FLATBUFFERS_STRUCT_END(CircleFB, 12);
+FLATBUFFERS_STRUCT_END(CircleFB, 10);
 
 struct AnimationFrameFB FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef AnimationFrameFBBuilder Builder;
