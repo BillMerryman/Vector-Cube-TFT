@@ -13,6 +13,9 @@
 #include "blink.h"
 #include "lookleft.h"
 #include "lookright.h"
+#include "AnimationFlatbuffer.h"
+
+using namespace AnimationFlatbuffer;
 
 //set up your own secrets.h file that creates defines for
 //your router SSID and password. You can use the 
@@ -95,23 +98,27 @@ void loop()
       case _Animation:
         if(bytewiseReceive((uint8_t *)animation, 4))
         {
-          uint32_t incoming_size = *(uint32_t *)animation;
-          if(incoming_size > animationSize)
+          uint32_t incomingAnimationPartSize = (*(uint32_t *)animation);
+          uint32_t tmpAnimationSize = (*(uint32_t *)animation) + 4;
+          if(tmpAnimationSize > animationSize)
           {
-            uint8_t *new_buf = (byte *)realloc(animation, 4 + incoming_size);
-            if (!new_buf) break;
-            animation = new_buf;
-            animationSize = incoming_size;
+            uint8_t *tmp = (byte *)realloc(animation, tmpAnimationSize);
+            if (!tmp) break;
+            animation = tmp;
+            animationSize = tmpAnimationSize;
           }
-          if(bytewiseReceive((uint8_t *)(animation + 4), incoming_size))
+          if(bytewiseReceive((uint8_t *)(animation + 4), incomingAnimationPartSize))
           {
-            //TODO: Call the animation validation here before conditionally starting the animation
-            //Note: the difference I may be seeing with single frames displaying shorter than frame duration
-            //could be because I am passing 'loopTime' instead of 'millis()', and the frame received code could
-            //be eating up a lot of the time between setting 'loopTime' and this point in the code.
-            //Needs further investigation... 
-            animationPlayer.start(animation, loopTime);
-            Serial.println("Animation received successfully.\n");
+            flatbuffers::Verifier verifier(animation, animationSize);
+            if(VerifySizePrefixedAnimationFBBuffer(verifier))
+            {
+              animationPlayer.start(animation, loopTime);
+              Serial.println("Animation received successfully.\n");
+            }
+            else
+            {
+              Serial.println("Animation failed verification.\n");
+            }
           }
           else
           {
